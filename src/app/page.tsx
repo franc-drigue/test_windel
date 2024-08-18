@@ -7,6 +7,7 @@ import LogoSmart from "../../public/logo_windel.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faSquareEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faSquareWhatsapp, faSquareInstagram } from '@fortawesome/free-brands-svg-icons';
+import Link from "next/link";
 
 
 export default function Login() {
@@ -58,7 +59,10 @@ export default function Login() {
                          />
                     </div>
                     <div>
-                        <Button className="w-full mt-4 bg-[#1347A8] hover:bg-[#1347a8da]">Entrar</Button>
+                        <Link href={'/list'}>
+                           <Button className="w-full mt-4 bg-[#1347A8] hover:bg-[#1347a8da]">Entrar</Button>
+                        </Link>
+                       
                     </div>
                 </div>
                 <div className="pt-[20px] space-y-1 md:absolute md:bottom-6">
