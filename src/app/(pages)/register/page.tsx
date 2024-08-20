@@ -1,37 +1,44 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster"
 
-import { v4 as uuidv4 } from 'uuid';
-
-const API_URL = 'https://teste-tecnico-front-api.up.railway.app';
+const url = 'https://teste-tecnico-front-api.up.railway.app/recipe';
 
 export default function Register() {
+  const { toast } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [ingredients, setIngredients] = useState([{ id: uuidv4(), name: '', quantity: '' }]);
+  const [ingredientName, setIngredientName] = useState('');
+  const [ingredientQuantity, setIngredientQuantity] = useState('');
+  const [ingredients, setIngredients] = useState<{ name: string; quantity: number }[]>([]);
   const [category, setCategory] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [response, setResponse] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
+    
     const data = {
       name,
       description,
-      ingredients,
+      ingredients: ingredients.map(ingredient => ({
+        name: ingredient.name,
+        quantity: ingredient.quantity
+      })),
       category,
-      isFavorite,
+      isFavorite
     };
 
+
     try {
-      const res = await fetch(`${API_URL}/recipe`, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,27 +46,52 @@ export default function Register() {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      
       const result = await res.json();
       setResponse(result);
+      toast({
+        title: 'Cadastro concluído',
+        description: 'Ingrediente adicionado',
+        duration: 5000, 
+      });
+      setIsFavorite(false)
+      setName("");
+      setDescription("");
+      setIngredientName("");
+      setIngredientQuantity("");
+      setCategory("")
     } catch (err) {
-      setError('Failed to make POST request');
-      console.error(err);
+      toast({
+        title: 'Campos vazios',
+        description: 'preencha os campos para cadastrar a recita',
+        duration: 5000, 
+      });
     }
   };
 
-  const handleIngredientChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    const newIngredients = [...ingredients];
-    newIngredients[index] = { ...newIngredients[index], [name]: value };
-    setIngredients(newIngredients);
-  };
+
+const handleCheckbox = () => {
+  setIsFavorite(!isFavorite)
+}
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { id: uuidv4(), name: '', quantity: '' }]);
+    if (ingredientName && ingredientQuantity) {
+      setIngredients([...ingredients, { name: ingredientName, quantity: parseFloat(ingredientQuantity) }]);
+      setIngredientName(''); 
+      setIngredientQuantity('');
+      toast({
+        title: 'Ingrediente adicionado',
+        description: `Adicionado: ${ingredientName}, Quantidade: ${ingredientQuantity}`,
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: 'Quantidade inválida',
+        description: 'Informe a quantidade do ingrediente',
+        duration: 3000, 
+      });
+    }
   };
 
   return (
@@ -67,7 +99,7 @@ export default function Register() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="block font-medium text-gray-700">
-            Name
+            Nome
             <Input
               type="text"
               value={name}
@@ -78,7 +110,7 @@ export default function Register() {
         </div>
         <div className="space-y-2">
           <label className="block font-medium text-gray-700">
-            Description
+            Descrição
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -86,40 +118,36 @@ export default function Register() {
             />
           </label>
         </div>
-        {ingredients.map((ingredient, index) => (
-          <div key={ingredient.id} className="space-y-2">
-            <label className="block font-medium text-gray-700">
-              Ingredient Name
-              <Input
-                type="text"
-                name="name"
-                value={ingredient.name}
-                onChange={(e) => handleIngredientChange(index, e)}
-                className="mt-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              />
-            </label>
-            <label className="block font-medium text-gray-700">
-              Quantity
-              <Input
-                type="number"
-                name="quantity"
-                value={ingredient.quantity}
-                onChange={(e) => handleIngredientChange(index, e)}
-                className="mt-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              />
-            </label>
-          </div>
-        ))}
-        <Button
-          type="button"
-          onClick={addIngredient}
-          className="bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Add Ingredient
-        </Button>
         <div className="space-y-2">
           <label className="block font-medium text-gray-700">
-            Category
+            Nome do ingrediente 
+            <Input
+              type="text"
+              value={ingredientName}
+              onChange={(e) => setIngredientName(e.target.value)}
+              className="mt-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+            />
+          </label>
+          <label className="block font-medium text-gray-700">
+            Quantidade
+            <Input
+              type="number"
+              value={ingredientQuantity}
+              onChange={(e) => setIngredientQuantity(e.target.value)}
+              className="mt-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+            />
+          </label>
+          <Button
+            type="button"
+            onClick={addIngredient}
+            className="bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Adicionar ingrediente
+          </Button>
+        </div>
+        <div className="space-y-2">
+          <label className="block font-medium text-gray-700">
+            Categoria
             <Input
               type="text"
               value={category}
@@ -129,22 +157,27 @@ export default function Register() {
           </label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox
-            checked={isFavorite}
-            onChange={(e:any) => setIsFavorite(e.target.checked)}
-            className="h-5 w-5"
-          />
-          <label className="font-medium text-gray-700">Is Favorite</label>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+             checked={isFavorite}
+             onCheckedChange={handleCheckbox} />
+          <label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            É sua receita favorita ?
+          </label>
+        </div>
         </div>
         <Button
           type="submit"
           className="bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
         >
-          Submit
+          Cadastrar
         </Button>
       </form>
-      {response && <pre className="mt-4 bg-gray-100 p-4 rounded">{JSON.stringify(response, null, 2)}</pre>}
-      {error && <p className="mt-4 text-red-500">{error}</p>}
+      {ingredients && <Toaster/>}
+      {response && <Toaster/>}
     </div>
   );
 }

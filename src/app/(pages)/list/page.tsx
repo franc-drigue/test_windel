@@ -9,14 +9,24 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Logo from "../../../../public/logo_windel.png"
 import { table } from "console";
+import { useRouter } from 'next/navigation';
+import DialogDeleteRecipe from "@/components/dialog/deleteDialog";
+
 
 const url = "https://teste-tecnico-front-api.up.railway.app/recipe"
 
+
 export default function ListRecipe() {
 
+  const router = useRouter();
+  const [isOpenDialog, setIsOpenDialog]= useState(false)
   const [data, setData] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const handleEditClick = (id: number) => {
+    router.push(`${id}`);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -52,7 +62,7 @@ export default function ListRecipe() {
   };
  
 
-  if (loading) return <div className="flex justify-center"><Image src={Logo} alt="Logo Gpdv" width={160}/></div>
+  if (loading) return <div className="flex justify-center h-[600px] items-center"><Image src={Logo} alt="Logo Gpdv" width={160}/></div>
   if (error) return <div>{error}</div>
 
   return (
@@ -81,6 +91,7 @@ export default function ListRecipe() {
                     ingredients={recipe.ingredients}
                     isFavorite={recipe.isFavorite}
                     onDelete={deleteRecipe}
+                    handleEditClick={handleEditClick}
                   />
               ))}
             </ul>
@@ -89,46 +100,3 @@ export default function ListRecipe() {
     </div>
   )
 }
-
-
-/*export default function List() {
-  const [infoRecipe, setInfoRecipe] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); 
-  const [error, setError] = useState<string | null>(null); 
-  
-
-  // Função para fazer a requisição HTTP
-  const httpRequest = async () => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data: Recipe [] = await response.json();
-      setInfoRecipe(data);
-      
-    } catch (error) {
-      setError('Error fetching data');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    httpRequest();
-  }, []);
-
-  // Renderização condicional com base no estado
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  return (
-   
-  );
-}*/
