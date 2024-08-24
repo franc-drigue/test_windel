@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster"
+import { Drawer } from '@/components/drawer/drawer';
 
 const url = 'https://teste-tecnico-front-api.up.railway.app/recipe';
 
@@ -85,7 +86,14 @@ const handleCheckbox = () => {
         description: `Adicionado: ${ingredientName}, Quantidade: ${ingredientQuantity}`,
         duration: 3000,
       });
-    } else {
+    } else if(name === "") {
+      toast({
+        title: 'Preencha o nome da Receita',
+        description: 'Informe a quantidade do ingrediente',
+        duration: 3000, 
+      });
+      return
+    }else {
       toast({
         title: 'Quantidade inválida',
         description: 'Informe a quantidade do ingrediente',
@@ -95,8 +103,13 @@ const handleCheckbox = () => {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-6 max-w-2xl mx-auto mt-[100px]">
+      <Drawer/>
+      <div className='min-w-[500px] flex justify-start font-sans font-black text-[40px] mb-4'>
+         <h1>Cadastre uma Receita</h1> 
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-4 bg-slate-50 p-4 rounded-md shadow-md">
         <div className="space-y-2">
           <label className="block font-medium text-gray-700">
             Nome
@@ -140,7 +153,7 @@ const handleCheckbox = () => {
           <Button
             type="button"
             onClick={addIngredient}
-            className="bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="bg-[#1347A8] text-white hover:bg-[#1347a8da] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
             Adicionar ingrediente
           </Button>

@@ -1,5 +1,3 @@
-import { Copy } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -9,30 +7,30 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+
 
 
 interface DialogDeleteRecipeProps {
   open: boolean;
   onClose: () => void;
   onDelete: () => void;
+  isBatchDelete?: boolean;
 }
 
-export default function DialogDeleteRecipe({open, onClose, onDelete} : DialogDeleteRecipeProps) {
+export default function DialogDeleteRecipe({open, onClose, onDelete, isBatchDelete} : DialogDeleteRecipeProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+       className="sm:max-w-md rounded-lg space-y-4"
+      >
         <DialogHeader>
-          <DialogTitle>Apagar Receita</DialogTitle>
+          <DialogTitle>Apagar {isBatchDelete ? "as receitas" : "a receita"}</DialogTitle>
           <DialogDescription>
-            Realmente deseja apagar a receita
+            Realmente deseja apagar {isBatchDelete ? "estas receitas" : "esta receita"}?
           </DialogDescription>
-          <Button onClick={() => {
+          <Button className="bg-[#1347A8] hover:bg-[#1347a8da]" onClick={() => {
             onDelete(); 
-            onClose(); 
           }}>
               Apagar
           </Button>

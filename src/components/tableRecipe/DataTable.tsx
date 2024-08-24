@@ -1,93 +1,209 @@
-'use client'
+import { useState, useEffect } from "react";
+import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import { Trash2, Pencil, CircleArrowRight, CircleArrowLeft } from "lucide-react";
+import DialogDeleteRecipe from "../dialog/deleteDialog";
 
-import {
-    ColumnDef,
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
-  } from "@tanstack/react-table"
-  
-  import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table"
+type Ingredients = {
+  name: string;
+  quantity: number;
+};
 
-import { Button } from "../ui/button"
-import { Trash2 } from "lucide-react"
+export type Recipe = {
+  id: number;
+  name: string;
+  description: string;
+  ingredients: Ingredients[];
+  category: string;
+  isFavorite: boolean;
+};
 
-
-interface DataTableProps<TData extends { id: number }, TValue>{
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface TableDemoProps {
+  recipes: Recipe[];
   onDelete: (id: number) => void;
+  handleEditClick: (id: number) => void;
 }
 
-export function DataTable<TData extends { id: number }, TValue>({
-  columns,
-  data,
-  onDelete,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
+const url = "https://teste-tecnico-front-api.up.railway.app/recipe/delete-in-batch";
+
+export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoProps) {
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [isBatchDelete, setIsBatchDelete] = useState<boolean>(false);
+  const [currentRecipeId, setCurrentRecipeId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [updatedRecipes, setUpdatedRecipes] = useState<Recipe[]>(recipes);
+
+  const pageSize = 6;
+  const pageCount = Math.ceil(updatedRecipes.length / pageSize);
+  const paginatedRecipes = updatedRecipes.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+
+  const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, pageCount - 1));
+
+  const handlePreviousPage = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
+
+  const handleCheckboxChange = (id: number) => {
+    setSelectedIds((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((selectedId) => selectedId !== id)
+        : [...prevSelected, id]
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(recipes.map((recipe) => recipe.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleDeleteMultiple = async () => {
+    if (selectedIds.length > 0) {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ registersId: selectedIds }),
+        });
+        if (!response.ok) throw new Error("Failed to delete recipes");
+
+        setUpdatedRecipes((prevRecipes) =>
+          prevRecipes.filter((recipe) => !selectedIds.includes(recipe.id))
+        );
+        setSelectedIds([]);
+      } catch (error) {
+        console.error("Failed to delete recipes:", error);
+      }
+    }
+  };
+
+  useEffect(() => setUpdatedRecipes(recipes), [recipes]);
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="flex flex-col min-h-screen justify-start">
+      <Table className="bg-slate-50 shadow-md rounded-xl">
+        <TableCaption>lista de suas receitas</TableCaption>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead>Descrição</TableHead>
+            <TableHead>Ingredientes</TableHead>
+            <TableHead>Categoria</TableHead>
+            <TableHead>Favorita</TableHead>
+            <TableHead>
+              <Checkbox
+                checked={
+                  selectedIds.length > 0 && selectedIds.length === recipes.length
+                    ? true
+                    : selectedIds.length > 0
+                    ? "indeterminate"
+                    : false
+                }
+                onCheckedChange={(checked: any) => handleSelectAll(checked)}
+              />
+            </TableHead>
+            <TableHead className="text-right">
+              <Button
+                onClick={() => {
+                  setIsBatchDelete(true);
+                  setDialogOpen(true);
+                }}
+                disabled={selectedIds.length === 0}
+                variant="outline"
+              >
+                Apagar todos
+              </Button>
+            </TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+          {paginatedRecipes.map((recipe) => (
+            <TableRow key={recipe.id}>
+              <TableCell className="font-medium">{recipe.name}</TableCell>
+              <TableCell>{recipe.description}</TableCell>
+              <TableCell>
+                {recipe.ingredients.map((ingredient, index) => (
+                  <div key={index}>
+                    {ingredient.name}: {ingredient.quantity}
+                  </div>
                 ))}
-                 <TableCell>
+              </TableCell>
+              <TableCell>{recipe.category}</TableCell>
+              <TableCell>{recipe.isFavorite ? "Sim" : "Não"}</TableCell>
+              <TableCell>
+                <Checkbox
+                  checked={selectedIds.includes(recipe.id)}
+                  onCheckedChange={() => handleCheckboxChange(recipe.id)}
+                />
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex space-x-2 justify-end">
                   <Button
-                    onClick={() => onDelete(row.original.id)}
+                    className="hover:bg-[#d2dff7da]"
+                    onClick={() => {
+                      setCurrentRecipeId(recipe.id);
+                      setIsBatchDelete(false);
+                      setDialogOpen(true);
+                    }}
+                    variant="outline"
                   >
-                    <Trash2 />
+                    <Trash2 className="text-[#1347A8]" />
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                  <Button
+                    className="hover:bg-[#fee8ecde]"
+                    onClick={() => handleEditClick(recipe.id)}
+                    variant="outline"
+                  >
+                    <Pencil className="text-[#a0263c]" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={7} className="text-center">
+              <div className="flex items-center justify-center space-x-6">
+                <Button
+                  variant={"ghost"}
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 0 || updatedRecipes.length === 0}
+                >
+                  <CircleArrowLeft />
+                </Button>
+                <span>
+                  Página {currentPage + 1} de {pageCount}
+                </span>
+                <Button
+                  variant={"ghost"}
+                  onClick={handleNextPage}
+                  disabled={currentPage === pageCount - 1 || updatedRecipes.length === 0}
+                >
+                  <CircleArrowRight />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
+      <DialogDeleteRecipe
+        isBatchDelete={isBatchDelete}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onDelete={() => {
+          if (isBatchDelete) {
+            handleDeleteMultiple();
+          } else if (currentRecipeId !== null) {
+            onDelete(currentRecipeId);
+          }
+          setDialogOpen(false);
+        }}
+      />
     </div>
-  )
+  );
 }

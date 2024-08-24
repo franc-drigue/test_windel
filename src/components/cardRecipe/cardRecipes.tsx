@@ -1,10 +1,10 @@
 "use client"
 
 import { Button } from "../ui/button";
-import { Link, Trash2 } from 'lucide-react';
-import { Pencil } from 'lucide-react';
+import { Trash2, Pencil, Plus } from 'lucide-react';
 import DialogDeleteRecipe from "../dialog/deleteDialog";
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 type ingredient = {
     name: string;
@@ -25,18 +25,18 @@ export type cardRecipes = {
 
 
 
-
-
-export default function Card({ id, name, description, category, ingredients, isFavorite, onDelete, handleEditClick } : cardRecipes){
-
+export default function CardRecipe({ id, name, description, category, ingredients, isFavorite, onDelete, handleEditClick,} : cardRecipes){
+    
+    const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
+  
 
     const handleDeleteConfirm = () => {
       onDelete(id);
       setDialogOpen(false);
     };
   
-    
+   
     return(
         <div className="py-2">
             <div className="bg-gray-100 shadow-slate-400 shadow-sm rounded-md p-3 flex justify-between">
@@ -56,19 +56,36 @@ export default function Card({ id, name, description, category, ingredients, isF
                 </div>
                 <div className="space-y-3">
                     <div>
-                    <Button onClick={() => setDialogOpen(true)}>
-                        <Trash2/>
+                    <Button 
+                      onClick={() => setDialogOpen(true)}
+                      className="hover:bg-[#d2dff7da]"
+                      variant="outline"
+                    >
+                        <Trash2 className="text-[#1347A8]"/>
                     </Button>
                     </div>
                     <div>
-                    <Button onClick={() => handleEditClick(id)}>
-                          <Pencil/>
+                    <Button 
+                      className="hover:bg-[#fee8ecde]"
+                      onClick={() => handleEditClick(id)}
+                      variant="outline"
+                    >
+                          <Pencil className="text-[#a0263c]"/>
+                    </Button>
+                    </div>
+                    <div>
+                    <Button
+                      className="hover:bg-green-50" 
+                      onClick={() => router.push("register")}
+                      variant="outline"
+                    >
+                          <Plus className="text-green-700"/>
                     </Button>
                     </div>
                 </div>
             </div>
             <div>
-              <DialogDeleteRecipe 
+              <DialogDeleteRecipe
                 open={dialogOpen} 
                 onClose={() => setDialogOpen(false)} 
                 onDelete={() => handleDeleteConfirm()}
