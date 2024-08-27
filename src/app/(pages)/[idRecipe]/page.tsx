@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from '@/components/ui/use-toast';
 import { Drawer } from "@/components/drawer/drawer";
 import Logo from "../../../../public/logo_windel.png"
 import Image from 'next/image';
@@ -26,8 +25,6 @@ const url = "https://teste-tecnico-front-api.up.railway.app/recipe";
 export default function EditRecipe({ params }: Props) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
   const router = useRouter(); 
 
   useEffect(() => {
@@ -40,7 +37,7 @@ export default function EditRecipe({ params }: Props) {
         const data: Recipe = await response.json();
         setRecipe(data);
       } catch (error) {
-        setError('Failed to fetch recipe');
+        console.error('Failed to fetch recipe');
       } finally {
         setLoading(false);
       }
@@ -97,13 +94,13 @@ export default function EditRecipe({ params }: Props) {
 
 
   if (loading) return <div className="flex justify-center h-[900px] items-center"><Image src={Logo} alt="Logo Gpdv" width={160}/></div>;
-  if (error) return <div>{error}</div>;
   if (!recipe) return <div>No recipe found</div>;
+
 
   return (
     <div className='flex flex-col justify-center h-[100vh] items-center'>
       <Drawer/>
-      <div className='min-w-[500px] flex justify-start font-sans font-black text-[40px] mb-4'>
+      <div className='min-w-[500px] flex justify-start font-sans font-black text-[40px] mb-4 p-3 mx-auto max-w-2xl'>
         <h1>Edite sua receita</h1>
       </div>
       <form className='flex flex-col space-y-4 w-[500px]  bg-slate-50 p-4 rounded-md shadow-md' onSubmit={handleSubmit}>
@@ -134,7 +131,7 @@ export default function EditRecipe({ params }: Props) {
           />
         </div>
         <div>
-          <label className='block mb-2 text-sm font-medium text-gray-700'>Ingredients:</label>
+          <label className='block mb-2 text-sm font-medium text-gray-700'>Ingredients e quantidades:</label>
             <div className='h-[150px] overflow-y-auto'>
                 <ul className='pl-5 py-1'>
                   {recipe.ingredients.map((ingredient, index) => (
@@ -167,10 +164,10 @@ export default function EditRecipe({ params }: Props) {
               checked={recipe.isFavorite}
               onCheckedChange={handleCheckboxChange}
             />
-            <span className='ml-2 text-sm font-medium text-gray-700'>Favorite:</span>
+            <span className='ml-2 text-sm font-medium text-gray-700'>Favorito:</span>
           </label>
         </div>
-        <Button type="submit" className='mt-4 bg-[#1347A8] hover:bg-[#1347a8da]'>Save</Button>
+        <Button type="submit" className='mt-4 bg-[#1347A8] hover:bg-[#1347a8da]'>Salvar</Button>
       </form>
     </div>
   );

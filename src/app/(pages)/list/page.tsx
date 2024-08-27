@@ -17,10 +17,10 @@ const url = "https://teste-tecnico-front-api.up.railway.app/recipe";
 export default function ListRecipe() {
 
   const router = useRouter();
-  const [data, setData] = useState<Recipe[]>([]);
+  const [dataRecipe, setData] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState("");
+  const [filterRecipeName, setFilter] = useState("");
 
   const handleEditClick = (id: number) => {
     router.push(`${id}`);
@@ -43,7 +43,7 @@ export default function ListRecipe() {
     }
 
     fetchData();
-  }, []);
+  }, [dataRecipe]);
 
   const deleteRecipe = async (id: number) => {
     try {
@@ -59,11 +59,11 @@ export default function ListRecipe() {
     }
   };
 
-  const filteredData = data.filter(recipe => 
-    recipe.name.toLowerCase().includes(filter.toLowerCase())
+  const filteredData = dataRecipe.filter(recipe => 
+    recipe.name.toLowerCase().includes(filterRecipeName.toLowerCase())
   );
 
-  if (loading) return <div className="flex justify-center h-[900px] items-center"><Image src={Logo} alt="Logo Gpdv" width={160}/></div>;
+  if (loading) return <div className="flex justify-center h-[900px] items-center"><Image src={Logo} alt="Logo Windel" width={160}/></div>;
   if (error) return <div>{error}</div>;
 
   return (
@@ -73,7 +73,7 @@ export default function ListRecipe() {
       <Input
           type="text"
           placeholder="Busque pelo o nome da receita"
-          value={filter}
+          value={filterRecipeName}
           onChange={(e) => setFilter(e.target.value)}
           className="border rounded p-2 mb-2 mt-4 w-[350px]"
         />
@@ -88,7 +88,7 @@ export default function ListRecipe() {
         <Input
           type="text"
           placeholder="Busque pelo o nome da receita"
-          value={filter}
+          value={filterRecipeName}
           onChange={(e) => setFilter(e.target.value)}
           className="border rounded p-2 mb-2 mt-4 w-full"
         />

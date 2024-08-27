@@ -4,6 +4,9 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Trash2, Pencil, CircleArrowRight, CircleArrowLeft } from "lucide-react";
 import DialogDeleteRecipe from "../dialog/deleteDialog";
+import Lottie from "lottie-react";
+import AnimationData from "../../../public/Animation.json"
+
 
 type Ingredients = {
   name: string;
@@ -19,7 +22,7 @@ export type Recipe = {
   isFavorite: boolean;
 };
 
-interface TableDemoProps {
+interface TableRecipesProps {
   recipes: Recipe[];
   onDelete: (id: number) => void;
   handleEditClick: (id: number) => void;
@@ -27,7 +30,7 @@ interface TableDemoProps {
 
 const url = "https://teste-tecnico-front-api.up.railway.app/recipe/delete-in-batch";
 
-export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoProps) {
+export function TableRecipes({ recipes, onDelete, handleEditClick }: TableRecipesProps) {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [isBatchDelete, setIsBatchDelete] = useState<boolean>(false);
   const [currentRecipeId, setCurrentRecipeId] = useState<number | null>(null);
@@ -149,6 +152,7 @@ export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoPr
                       setIsBatchDelete(false);
                       setDialogOpen(true);
                     }}
+                    disabled={selectedIds.length > 0}
                     variant="outline"
                   >
                     <Trash2 className="text-[#1347A8]" />
@@ -156,6 +160,7 @@ export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoPr
                   <Button
                     className="hover:bg-[#fee8ecde]"
                     onClick={() => handleEditClick(recipe.id)}
+                    disabled={selectedIds.length > 0}
                     variant="outline"
                   >
                     <Pencil className="text-[#a0263c]" />
@@ -166,8 +171,10 @@ export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoPr
           ))}
         </TableBody>
         <TableFooter>
-          <TableRow>
-            <TableCell colSpan={7} className="text-center">
+        
+            {  updatedRecipes.length > 0 ? 
+            <TableRow>
+              <TableCell colSpan={7} className="text-center">
               <div className="flex items-center justify-center space-x-6">
                 <Button
                   variant={"ghost"}
@@ -188,7 +195,22 @@ export function TableRecipes({ recipes, onDelete, handleEditClick }: TableDemoPr
                 </Button>
               </div>
             </TableCell>
-          </TableRow>
+            </TableRow>
+            :
+            <TableRow >
+              <TableCell colSpan={7}>
+               <div className="flex justify-center h-[200px]">
+                <div className="space-y-1 flex flex-col justify-center items-center">
+                  <Lottie
+                    style={{width: 150}}
+                    animationData={AnimationData}/>
+                  <p className="text-slate-500">Sem receitas para exibir</p>
+                </div>
+            </div>
+            </TableCell> 
+            </TableRow>
+            }
+         
         </TableFooter>
       </Table>
       <DialogDeleteRecipe

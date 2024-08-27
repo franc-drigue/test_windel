@@ -20,7 +20,7 @@ export default function Register() {
   const [ingredients, setIngredients] = useState<{ name: string; quantity: number }[]>([]);
   const [category, setCategory] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-  const [response, setResponse] = useState<any>(null);
+  const [responseRecipe, setResponseRecipe] = useState<any>(null);
 
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -50,7 +50,7 @@ export default function Register() {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       
       const result = await res.json();
-      setResponse(result);
+      setResponseRecipe(result);
       toast({
         title: 'Cadastro concluído',
         description: 'Ingrediente adicionado',
@@ -86,14 +86,14 @@ const handleCheckbox = () => {
         description: `Adicionado: ${ingredientName}, Quantidade: ${ingredientQuantity}`,
         duration: 3000,
       });
-    } else if(name === "") {
+    } else if( ingredientName === "" ) {
       toast({
-        title: 'Preencha o nome da Receita',
+        title: `Preencha o nome do Ingrediente`,
         description: 'Informe a quantidade do ingrediente',
         duration: 3000, 
       });
       return
-    }else {
+    }else if ( ingredientQuantity === "") {
       toast({
         title: 'Quantidade inválida',
         description: 'Informe a quantidade do ingrediente',
@@ -190,7 +190,7 @@ const handleCheckbox = () => {
         </Button>
       </form>
       {ingredients && <Toaster/>}
-      {response && <Toaster/>}
+      {responseRecipe && <Toaster/>}
     </div>
   );
 }

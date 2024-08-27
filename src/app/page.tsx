@@ -20,9 +20,9 @@ export default function Login() {
                         src={Logo}
                         alt="Logo Gpdv"
                         width={300}
-                        className="lg:w-[300px] xs:w-[1px]"
+                        className="lg:w-[300px] xs:w-[1px] hover:scale-105 duration-300 hover:-rotate-2"
                     />
-                    <h1 className="md:text-[55px] lg:text-[70px] font-sans font-bold text-[#898989] text-center mt-[10px]">TESTE WINDEL</h1>
+                    <h1 className="md:text-[55px] lg:text-[70px] font-sans font-bold text-[#898989] text-center mt-[10px]">WINDEL RECEITAS</h1>
                </div>
                <div className="absolute bottom-6">
                   <p className="text-[#575757] text-center">Developed by F. Rodrigues</p>
